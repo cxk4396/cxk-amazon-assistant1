@@ -1,0 +1,13 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
+  "identifier": "main-capability",
+  "description": "Main app capability",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "fs:allow-read",
+    "fs:allow-write",
+    "dialog:allow-open",
+    "dialog:allow-save"
+  ]
+}
