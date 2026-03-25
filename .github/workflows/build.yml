@@ -17,13 +17,14 @@ jobs:
         run: cd frontend && npm run build
       - name: Install tauri-cli
         run: cargo install tauri-cli --version "^2.0.0" --locked
-      - name: Generate default icons
+      - name: Download and generate icons
+        shell: bash
         run: |
           cd src-tauri
-          # Create a simple 1024x1024 base icon using ImageMagick or download default
-          curl -L -o icon.png "https://raw.githubusercontent.com/tauri-apps/tauri/dev/tooling/bundler/src/bundle/windows/resources/icon.png" || echo "Using placeholder"
-          cargo tauri icon icon.png || echo "Icon generation skipped"
-        shell: bash
+          # Download a valid PNG icon (Tauri logo as placeholder)
+          curl -L -o icon.png "https://raw.githubusercontent.com/tauri-apps/tauri/dev/examples/api/src-tauri/icons/icon.png"
+          # Generate icons
+          cargo tauri icon icon.png
       - name: Build Tauri
         uses: tauri-apps/tauri-action@v0
         env:
