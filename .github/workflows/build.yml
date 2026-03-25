@@ -29,8 +29,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Rust stable
+      - name: Install Rust
         uses: dtolnay/rust-action@stable
+        with:
+          targets: ${{ matrix.args != "" && matrix.args || "" }}
 
       - name: Install dependencies (Ubuntu only)
         if: matrix.platform == "ubuntu-22.04"
