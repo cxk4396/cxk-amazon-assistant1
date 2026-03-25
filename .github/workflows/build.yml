@@ -13,21 +13,65 @@ jobs:
           node-version: 20
       - uses: dtolnay/rust-toolchain@stable
       
-      - run: cd frontend && npm install
-      - run: cd frontend && npm run build
-      - run: cargo install tauri-cli --version "^2.0.0" --locked
+      # 安装前端依赖
+      - name: Install frontend dependencies
+        run: cd frontend && npm install
       
+      # 使用 .NET 生成图标（无需 ImageMagick）
       - name: Create icon
         shell: pwsh
-        run: magick convert -size 1024x1024 xc:#4285F4 -pointsize 300 -fill white -gravity center -annotate +0+0 "CXK" src-tauri/icon.png
+        run: |
+          $code = @'
+          using System.Drawing;
+          using System.Drawing.Drawing2D;
+          using System.Drawing.Text;
+          
+          int size = 1024;
+          var bmp = new Bitmap(size, size);
+          using (var g = Graphics.FromImage(bmp)) {
+              g.SmoothingMode = SmoothingMode.AntiAlias;
+              g.TextRenderingHint = TextRenderingHint.AntiAlias;
+              g.Clear(Color.FromArgb(66, 133, 244));
+              using (var font = new Font("Arial", 300, FontStyle.Bold)) {
+                  var text = "CXK";
+                  var textSize = g.MeasureString(text, font);
+                  g.DrawString(text, font, Brushes.White, 
+                      (size - textSize.Width) / 2, 
+                      (size - textSize.Height) / 2);
+              }
+          }
+          
+          # 确保目录存在
+          New-Item -ItemType Directory -Force -Path "src-tauri/icons" | Out-Null
+          
+          # 保存主图标
+          bmp.Save("src-tauri/icon.png");
+          bmp.Dispose();
+          Write-Host "Icon created successfully at src-tauri/icon.png"
+          '@
+          
+          Add-Type -TypeDefinition $code -ReferencedAssemblies System.Drawing
       
-      - run: cd src-tauri && cargo tauri icon icon.png
+      # 安装 Tauri CLI
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2.0.0" --locked
       
-      - name: Build
+      # 生成多尺寸图标
+      - name: Generate icons
+        run: |
+          cd src-tauri
+          cargo tauri icon icon.png
+      
+      # Tauri 构建（自动执行 beforeBuildCommand）
+      - name: Build Tauri App
         shell: pwsh
-        run: cd src-tauri && cargo tauri build
+        run: |
+          cd src-tauri
+          cargo tauri build
       
-      - uses: actions/upload-artifact@v4
+      # 上传产物
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: installer
           path: src-tauri/target/release/bundle/**/*.exe
