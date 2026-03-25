@@ -27,26 +27,22 @@ jobs:
       - name: Install tauri-cli
         run: cargo install tauri-cli --version "^2.0.0" --locked
 
-      - name: Create icon
+      - name: Create icon with ImageMagick
         shell: pwsh
         run: |
-          cd src-tauri
-          # 创建一个简单的 1x1 像素 PNG 并放大到 1024x1024
-          # 使用 .NET 创建纯色图片
-          Add-Type -AssemblyName System.Drawing
-          $bmp = New-Object System.Drawing.Bitmap(1024, 1024)
-          $g = [System.Drawing.Graphics]::FromImage($bmp)
-          $g.Clear([System.Drawing.Color]::FromArgb(66, 133, 244))
-          # 添加文字 CXK
-          $font = New-Object System.Drawing.Font("Arial", 300)
-          $brush = [System.Drawing.Brushes]::White
-          $g.DrawString("CXK", $font, $brush, 100, 300)
-          $g.Dispose()
-          $font.Dispose()
-          $bmp.Save("icon.png", [System.Drawing.Imaging.ImageFormat]::Png)
-          $bmp.Dispose()
-          Write-Host "Icon created successfully"
-          Get-ChildItem icon.png
+          # 使用 ImageMagick 创建图标（GitHub Actions Windows runner 已预装）
+          $iconPath = "$PWD\src-tauri\icon.png"
+          
+          # 创建一个 1024x1024 的纯色背景图标
+          magick convert -size 1024x1024 xc:#4285F4 -pointsize 300 -fill white -gravity center -annotate +0+0 "CXK" "$iconPath"
+          
+          if (Test-Path "$iconPath") {
+            Write-Host "Icon created successfully at: $iconPath"
+            Get-ChildItem "$iconPath"
+          } else {
+            Write-Error "Failed to create icon"
+            exit 1
+          }
 
       - name: Generate Tauri icons
         run: |
