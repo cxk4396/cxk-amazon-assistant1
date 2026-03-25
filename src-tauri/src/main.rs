@@ -13,7 +13,7 @@ fn main() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
         .setup(|app| {
-            let app_handle = app.handle();
+            let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 let _ = database::init_database(&app_handle).await;
             });
