@@ -2,9 +2,7 @@ name: "Build Tauri App"
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master]
   pull_request:
 
 jobs:
@@ -26,6 +24,9 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-action@stable
 
+      - name: install Tauri CLI
+        run: cargo install tauri-cli --version "^2.0.0"
+
       - name: install dependencies (ubuntu only)
         if: matrix.platform == "ubuntu-22.04"
         run: |
@@ -36,9 +37,10 @@ jobs:
         working-directory: ./frontend
         run: npm install
 
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: ./frontend
-          args: ${{ matrix.args }}
+      - name: build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: build Tauri
+        working-directory: ./src-tauri
+        run: cargo tauri build
