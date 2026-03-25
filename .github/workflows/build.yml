@@ -27,33 +27,26 @@ jobs:
       - name: Install tauri-cli
         run: cargo install tauri-cli --version "^2.0.0" --locked
 
-      - name: Create icon.png
+      - name: Create icon
         shell: pwsh
         run: |
           cd src-tauri
-          # Download a reliable PNG image (1024x1024 blue square)
-          $url = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Playstation_logo_colour.svg/1024px-Playstation_logo_colour.svg.png"
-          try {
-            Invoke-WebRequest -Uri $url -OutFile "icon.png" -UseBasicParsing -TimeoutSec 30
-            Write-Host "Downloaded icon successfully"
-          } catch {
-            Write-Host "Download failed, creating a simple BMP and converting to PNG"
-            # Create a simple blue square using .NET
-            Add-Type -AssemblyName System.Drawing
-            $bitmap = New-Object System.Drawing.Bitmap(1024, 1024)
-            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-            $graphics.Clear([System.Drawing.Color]::FromArgb(66, 133, 244))
-            $graphics.Dispose()
-            $bitmap.Save("icon.png", [System.Drawing.Imaging.ImageFormat]::Png)
-            $bitmap.Dispose()
-          }
-          # Verify the file exists and has content
-          if (Test-Path "icon.png") {
-            $size = (Get-Item "icon.png").Length
-            Write-Host "Icon file size: $size bytes"
-          } else {
-            throw "icon.png was not created!"
-          }
+          # 创建一个简单的 1x1 像素 PNG 并放大到 1024x1024
+          # 使用 .NET 创建纯色图片
+          Add-Type -AssemblyName System.Drawing
+          $bmp = New-Object System.Drawing.Bitmap(1024, 1024)
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.Clear([System.Drawing.Color]::FromArgb(66, 133, 244))
+          # 添加文字 CXK
+          $font = New-Object System.Drawing.Font("Arial", 300)
+          $brush = [System.Drawing.Brushes]::White
+          $g.DrawString("CXK", $font, $brush, 100, 300)
+          $g.Dispose()
+          $font.Dispose()
+          $bmp.Save("icon.png", [System.Drawing.Imaging.ImageFormat]::Png)
+          $bmp.Dispose()
+          Write-Host "Icon created successfully"
+          Get-ChildItem icon.png
 
       - name: Generate Tauri icons
         run: |
