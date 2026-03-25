@@ -17,9 +17,12 @@ jobs:
         working-directory: ./frontend
         run: npm install
       
-      - name: Build frontend
+      # 完全跳过类型检查，直接vite构建
+      - name: Build frontend (no type check)
         working-directory: ./frontend
-        run: npx vite build
+        run: npx vite build --emptyOutDir
+        env:
+          NODE_ENV: production
       
       - name: Install Tauri CLI
         run: cargo install tauri-cli --version "^2.0.0" --locked
@@ -47,7 +50,6 @@ jobs:
           $bmp.Save("src-tauri/icons/icon.png")
           $g.Dispose()
           $bmp.Dispose()
-          Write-Host "Icon created at src-tauri/icons/icon.png"
       
       - name: Generate Tauri icons
         shell: pwsh
