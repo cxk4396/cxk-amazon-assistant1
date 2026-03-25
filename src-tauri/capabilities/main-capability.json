@@ -1,13 +1,19 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "identifier": "main-capability",
-  "description": "Main app capability",
+  "description": "Main capability for CXK Amazon Assistant",
+  "local": true,
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "fs:allow-read",
-    "fs:allow-write",
+    "shell:allow-open",
     "dialog:allow-open",
-    "dialog:allow-save"
+    "fs:default",
+    "fs:allow-read-file",
+    "fs:allow-write-file",
+    "fs:allow-read-dir",
+    "fs:allow-stat",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:allow-select"
   ]
 }
