@@ -30,30 +30,19 @@ jobs:
       - name: Create icon with ImageMagick
         shell: pwsh
         run: |
-          # 使用 ImageMagick 创建图标（GitHub Actions Windows runner 已预装）
           $iconPath = "$PWD\src-tauri\icon.png"
-          
-          # 创建一个 1024x1024 的纯色背景图标
           magick convert -size 1024x1024 xc:#4285F4 -pointsize 300 -fill white -gravity center -annotate +0+0 "CXK" "$iconPath"
-          
-          if (Test-Path "$iconPath") {
-            Write-Host "Icon created successfully at: $iconPath"
-            Get-ChildItem "$iconPath"
-          } else {
-            Write-Error "Failed to create icon"
-            exit 1
-          }
+          if (Test-Path "$iconPath") { Write-Host "Icon created"; Get-ChildItem "$iconPath" } else { exit 1 }
 
       - name: Generate Tauri icons
-        run: |
-          cd src-tauri
-          cargo tauri icon icon.png
+        run: cd src-tauri && cargo tauri icon icon.png
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          projectPath: ./src-tauri
           tagName: app-v__VERSION__
           releaseName: "App v__VERSION__"
           releaseBody: "See the assets to download this version and install."
