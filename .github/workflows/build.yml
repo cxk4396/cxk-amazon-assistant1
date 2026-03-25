@@ -2,15 +2,24 @@ name: "Build Tauri App"
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
+    branches:
+      - main
+      - master
 
 jobs:
-  build:
+  publish-tauri:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-22.04, windows-latest, macos-latest]
+        include:
+          - platform: "ubuntu-22.04"
+            args: ""
+          - platform: "windows-latest"
+            args: ""
+          - platform: "macos-latest"
+            args: ""
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -34,8 +43,9 @@ jobs:
         working-directory: ./frontend
         run: npm install
 
-      - name: build Tauri app
-        working-directory: ./frontend
-        run: npx tauri build
+      - uses: tauri-apps/tauri-action@v0
         env:
-          CI: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: ./frontend
+          args: ${{ matrix.args }}
