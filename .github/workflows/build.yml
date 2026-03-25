@@ -2,37 +2,65 @@ name: Build
 on:
   push:
     branches: [main, master]
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Install npm deps
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend dependencies
         run: cd frontend && npm install
+
       - name: Build frontend
         run: cd frontend && npm run build
+
       - name: Install tauri-cli
         run: cargo install tauri-cli --version "^2.0.0" --locked
-      - name: Generate icons with ImageMagick
+
+      - name: Create icon.png
         shell: pwsh
         run: |
           cd src-tauri
-          # Create a simple 1024x1024 blue square icon using ImageMagick
-          $xml = @"
-          <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">
-            <rect width="1024" height="1024" fill="#4285f4"/>
-            <text x="512" y="600" font-size="400" text-anchor="middle" fill="white" font-family="Arial">CXK</text>
-          </svg>
-          "@
-          $xml | Out-File -FilePath "icon.svg" -Encoding UTF8
-          # Use ImageMagick to convert SVG to PNG if available, otherwise download a default
-          magick convert icon.svg icon.png 2>$null || curl -L -o icon.png "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Playstation_logo_colour.svg/1024px-Playstation_logo_colour.svg.png"
+          # Download a reliable PNG image (1024x1024 blue square)
+          $url = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Playstation_logo_colour.svg/1024px-Playstation_logo_colour.svg.png"
+          try {
+            Invoke-WebRequest -Uri $url -OutFile "icon.png" -UseBasicParsing -TimeoutSec 30
+            Write-Host "Downloaded icon successfully"
+          } catch {
+            Write-Host "Download failed, creating a simple BMP and converting to PNG"
+            # Create a simple blue square using .NET
+            Add-Type -AssemblyName System.Drawing
+            $bitmap = New-Object System.Drawing.Bitmap(1024, 1024)
+            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+            $graphics.Clear([System.Drawing.Color]::FromArgb(66, 133, 244))
+            $graphics.Dispose()
+            $bitmap.Save("icon.png", [System.Drawing.Imaging.ImageFormat]::Png)
+            $bitmap.Dispose()
+          }
+          # Verify the file exists and has content
+          if (Test-Path "icon.png") {
+            $size = (Get-Item "icon.png").Length
+            Write-Host "Icon file size: $size bytes"
+          } else {
+            throw "icon.png was not created!"
+          }
+
+      - name: Generate Tauri icons
+        run: |
+          cd src-tauri
           cargo tauri icon icon.png
-      - name: Build Tauri
+
+      - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
