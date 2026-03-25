@@ -9,8 +9,7 @@
           基于A9+COSMO算法的智能亚马逊运营决策系统
         </p>
         <el-button type="primary" size="large" @click="$router.push('/upload')"
-          class="start-btn"
-003e
+          class="start-btn">
           <el-icon class="btn-icon"><Rocket /></el-icon>
           开始分析
         </el-button>
