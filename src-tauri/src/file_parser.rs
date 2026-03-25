@@ -10,7 +10,7 @@ pub fn parse_excel(path: &str) -> Result<crate::commands::ParsedData, Box<dyn st
     let mut columns = vec![];
     let mut rows = vec![];
     
-    if let Some(Ok(range)) = workbook.worksheet_range(&sheet_name) {
+    if let Ok(range) = workbook.worksheet_range(&sheet_name) {
         for (i, row) in range.rows().enumerate() {
             if i == 0 {
                 for cell in row {
@@ -35,15 +35,16 @@ pub fn parse_csv(path: &str) -> Result<crate::commands::ParsedData, Box<dyn std:
     let file = File::open(path)?;
     let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(file);
     
-    let columns = rdr.headers()?.iter().map(|s| s.to_string()).collect();
+    let headers = rdr.headers()?.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+    let columns = headers.clone();
     let mut rows = vec![];
     
     for result in rdr.records() {
         let record = result?;
         let mut row_map = HashMap::new();
         for (i, value) in record.iter().enumerate() {
-            if let Some(col_name) = rdr.headers()?.get(i) {
-                row_map.insert(col_name.to_string(), value.to_string());
+            if let Some(col_name) = headers.get(i) {
+                row_map.insert(col_name.clone(), value.to_string());
             }
         }
         rows.push(row_map);
