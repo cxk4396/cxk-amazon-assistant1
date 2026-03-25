@@ -11,9 +11,11 @@ jobs:
         with:
           node-version: 20
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install deps
+      - name: Install Linux deps
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - name: Install npm deps
         run: cd frontend && npm install
-      - name: Build app
+      - name: Build frontend
+        run: cd frontend && npm run build
+      - name: Build Tauri
         run: cd frontend && npm run tauri build
