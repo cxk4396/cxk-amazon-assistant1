@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="80" fill="#FF9900"/>
+  
+  <!-- 内部圆角矩形 -->
+  <rect x="40" y="40" width="432" height="432" rx="60" fill="#ffffff"/>
+  
+  <!-- 图表元素 - 柱状图 -->
+  <rect x="100" y="280" width="60" height="140" rx="8" fill="#FF9900"/>
+  <rect x="190" y="200" width="60" height="220" rx="8" fill="#146EB4"/>
+  <rect x="280" y="150" width="60" height="270" rx="8" fill="#FF9900"/>
+  <rect x="370" y="100" width="60" height="320" rx="8" fill="#232F3E"/>
+  
+  <!-- 上升箭头 -->
+  <path d="M 320 80 L 380 80 L 380 140 L 320 80" fill="#00A8E1"/>
+  
+  <!-- 文字 CXK -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#232F3E">CXK</text>
+</svg>
