@@ -15,19 +15,23 @@ jobs:
       
       - name: Install frontend dependencies
         working-directory: ./frontend
-        run: npm install
+        run: |
+          npm install
+          npm list vite
       
-      # 完全跳过类型检查，直接vite构建
-      - name: Build frontend (no type check)
+      # 直接使用 npx vite 构建
+      - name: Build frontend
         working-directory: ./frontend
-        run: npx vite build --emptyOutDir
-        env:
-          NODE_ENV: production
+        run: |
+          npx vite --version
+          npx vite build 2>&1
       
       - name: Install Tauri CLI
+        if: success()
         run: cargo install tauri-cli --version "^2.0.0" --locked
       
       - name: Create icons directory
+        if: success()
         shell: pwsh
         run: |
           if (!(Test-Path "src-tauri/icons")) {
@@ -35,6 +39,7 @@ jobs:
           }
       
       - name: Create icon with .NET
+        if: success()
         shell: pwsh
         run: |
           Add-Type -AssemblyName System.Drawing
@@ -52,18 +57,21 @@ jobs:
           $bmp.Dispose()
       
       - name: Generate Tauri icons
+        if: success()
         shell: pwsh
         run: |
           cd src-tauri
           cargo tauri icon icons/icon.png
       
       - name: Build Tauri App
+        if: success()
         shell: pwsh
         run: |
           cd src-tauri
           cargo tauri build
       
       - name: Upload artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: installer
