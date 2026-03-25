@@ -5,10 +5,6 @@ description = "CXK Amazon Assistant"
 edition = "2021"
 rust-version = "1.77.0"
 
-[lib]
-name = "cxk_amazon_assistant_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
-
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
